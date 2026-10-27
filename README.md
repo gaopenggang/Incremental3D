@@ -1,12 +1,11 @@
 # Increment3D-ext
 
-Given a noisy, incrementally-built robot scene graph (positions, orientations, and object labels from onboard perception), the model predicts poses and shape features for each object as the robot explores the scene.
+Given a noisy, incrementally-built robot scene graph (object position, size, and object labels from onboard perception), the model predicts 3D scene as the robot explores the scene.
 
 ---
 
 ## Environment Setup
 
-Tested on Ubuntu 20.04, CUDA 11.7.
 
 ```bash
 conda create -n increment3d python=3.9
@@ -40,7 +39,7 @@ The dataset consists of two aligned data sources per sequence:
 | Ground Truth | `<gt_root>/<seq>/sg_frame_XXXXX.json` | Per-frame GT 3D annotation (position, orientation, size, shape model) |
 
 
-### Normalization Statistics
+### Dataset Normalization Statistics
 
 Compute per-split normalization statistics before training (only needed once, or when the dataset changes):
 
@@ -107,7 +106,7 @@ python scripts/eval_tele_incremental.py \
     --gt_stats   "/path/to/boxes_stats_tele_gt_trainval.txt" \
     --splits_dir "/path/to/splits"
 ```
-python scripts/eval_tele_incremental.py     --exp   /home/gao/data_weight/tele_incremental_12    --epoch 199     --split val     --enc_stats "/media/gao/gao_ssd/3D Scene/boxes_stats_tele_enc_trainval.txt"     --gt_stats  "/media/gao/gao_ssd/3D Scene/boxes_stats_tele_gt_trainval.txt" --splits_dir "/media/gao/gao_ssd/3D Scene/splits" 
+```bash
 
 python scripts/eval_tele_incremental.py \
     --exp        /home/gao/data_weight/tele_incremental_12 \
@@ -120,23 +119,7 @@ python scripts/eval_tele_incremental.py \
     --visualize  True \
     --shape_features_pkl "/media/gao/gao_ssd/3D objects/features.pkl" \
     --obj_dir    "/media/gao/gao_ssd/3D objects"
-
-python scripts/ros_telescene_inference.py     --exp      /home/gao/data_weight/tele_incremental_12     --epoch    199     --enc_stats "/media/gao/gao_ssd/3D Scene/boxes_stats_tele_enc_trainval.txt"     --gt_stats  "/media/gao/gao_ssd/3D Scene/boxes_stats_tele_gt_trainval.txt"     --obj_dir   "/media/gao/gao_ssd/3D objects"     --shape_features_pkl "/media/gao/gao_ssd/3D objects/features.pkl" --pose_deadband_m 0.1
-
-conda create -n increment3d python=3.8
-conda activate increment3d
-source /opt/ros/foxy/setup.bash          # 让 rclpy/scene_msgs 可见（cp38 匹配）
-source ~/ros2_ws/install/setup.bash      # scene_msgs 在这个工作空间里
-# README 里的依赖：torch 2.0.1+cu117 不支持 3.8 的话用 torch 2.0.1 的 cp38 wheel（PyPI/cu117 index 有 cp38）
-pip install torch==2.0.1 --index-url https://download.pytorch.org/whl/cu117
-pip install open3d trimesh scipy tensorboardX numpy   # open3d 0.19 需要 Python ≥3.8，可用
-
-The evaluator reports:
-
-- **Position error** (L1, metres) — overall and per-class
-- **Yaw error** (degrees)
-- **Shape retrieval** — Chamfer Distance, F-score
-- **Full vs. partial observation** — metrics split by enc/GT footprint ratio ≥ 0.7
+```
 
 ---
 
@@ -144,21 +127,14 @@ The evaluator reports:
 
 ### SLAM-style Incremental Visualization
 
-To visualize the model's step-by-step inference on a specific sequence:
+The 3D scene will be visualized incrementally after it reveice the telscene topic from remote side:
+
 
 ```bash
-python scripts/eval_tele_incremental.py \
-    --exp        "/path/to/experiment" \
-    --epoch      199 \
-    --split      val \
-    --enc_stats  "/path/to/boxes_stats_tele_enc_trainval.txt" \
-    --gt_stats   "/path/to/boxes_stats_tele_gt_trainval.txt" \
-    --splits_dir "/path/to/splits" \
-    --seq        36_2 \
-    --visualize
+python scripts/ros_telescene_inference.py     --exp      /home/gao/data_weight/tele_incremental_12     --epoch    199     --enc_stats "/media/gao/gao_ssd/3D Scene/boxes_stats_tele_enc_trainval.txt"     --gt_stats  "/media/gao/gao_ssd/3D Scene/boxes_stats_tele_gt_trainval.txt"     --obj_dir   "/media/gao/gao_ssd/3D objects"     --shape_features_pkl "/media/gao/gao_ssd/3D objects/features.pkl" --pose_deadband_m 0.1
 ```
 
-**Ground-truth 3D scene graph:**
+**Ground-truth 3D scene graph visualization:**
 
 ```bash
 python scripts/visualize_gt_3d.py \
@@ -166,7 +142,7 @@ python scripts/visualize_gt_3d.py \
     --obj_dir "/path/to/3d_objects"
 ```
 
-**Robot-side (operator) scene graph:**
+**Robot-side scene graph visualization:**
 
 ```bash
 python scripts/visualize_robot_3d.py \

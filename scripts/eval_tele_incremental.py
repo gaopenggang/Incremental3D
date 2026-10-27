@@ -982,7 +982,7 @@ def evaluate():
     extra_results = run_online_checks(dataset, model, device)
 
     # metric accumulators (global + per-class)
-    box_keys = ['position']
+    box_keys = ['position', 'Overlap_GT(%)']
     box_sum       = {k: 0.0 for k in box_keys}
     n_steps       = 0
     n_pairs       = 0
@@ -991,7 +991,7 @@ def evaluate():
     total_enc_pos_err = 0.0   # robot-side (encoder) position as baseline
     total_yaw_err = 0.0
     # full vs partial observation split (enc footprint / GT footprint >= 0.8 → full)
-    _OBS_THRESH = 0.90
+    _OBS_THRESH = 0.9
     acc_obs = {k: {'pos': 0.0, 'yaw': 0.0, 'n': 0, 'n_rot': 0}
                for k in ('full', 'partial')}
     shape_sum_obs = {k: {'CD': 0.0, 'F-score': 0.0, 'Vox_IoU': 0.0, 'n': 0}

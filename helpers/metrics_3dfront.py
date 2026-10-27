@@ -183,7 +183,7 @@ def _get_chamfer():
 def validate_shape_accuracy(shapes_mesh_pred, shapes_mesh_gt,
                             n_sample: int   = 2048,
                             f_thresh: float = 0.1,
-                            voxel_size: float = 0.2) -> dict:
+                            voxel_size: float = 0.25) -> dict:
     """
     Compute shape quality metrics for a list of (pred, gt) mesh pairs.
 
